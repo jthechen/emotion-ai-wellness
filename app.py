@@ -83,7 +83,7 @@ div[data-testid="stMetric"] {
     box-shadow: 0px 3px 12px rgba(70, 50, 90, 0.05);
 }
 
-/* Valor de las métricas */
+/* Valor de métricas */
 div[data-testid="stMetricValue"] {
     font-size: 28px;
 }
@@ -124,8 +124,6 @@ hr {
 # 3. CABECERA TEMÁTICA
 # =========================================================
 
-# Se construye en una sola cadena para evitar que Streamlit
-# muestre el HTML como bloque de código.
 st.markdown(
     '<div class="hero">'
     '<div class="hero-title">🧠 EmotionAI</div>'
@@ -188,14 +186,12 @@ DISP = "cuda" if torch.cuda.is_available() else "cpu"
 @st.cache_resource
 def cargar_modelo():
 
-    # Misma arquitectura utilizada durante el entrenamiento
     modelo = timm.create_model(
         "efficientnet_b0",
         pretrained=False,
         num_classes=2
     )
 
-    # Buscar checkpoint local o en /content/
     ruta = "efficientnet_emociones.pt"
 
     if (
@@ -223,7 +219,6 @@ def cargar_modelo():
 
     clases = checkpoint["clases"]
 
-    # Mismo preprocesamiento utilizado por EfficientNet
     prep = timm.data.create_transform(
         **timm.data.resolve_model_data_config(modelo)
     )
@@ -275,7 +270,7 @@ Reglas:
 """
 
     respuesta = client.models.generate_content(
-        model="gemini-3.8-flash",
+        model="gemini-2.5-flash",
         contents=prompt
     )
 
@@ -283,21 +278,36 @@ Reglas:
 
 
 # =========================================================
-# 7. CARGA DE IMAGEN
+# 7. INGRESO DE IMAGEN
 # =========================================================
 
 st.markdown("## 😊 Analiza una expresión facial")
 
 st.write(
-    "Sube una fotografía facial en formato JPG, JPEG o PNG "
-    "para realizar el análisis."
+    "Puedes subir una imagen desde tu dispositivo o tomar una fotografía "
+    "directamente con la cámara."
 )
 
-archivo = st.file_uploader(
-    "Selecciona una imagen facial",
-    type=["jpg", "jpeg", "png"],
-    label_visibility="collapsed"
+opcion = st.radio(
+    "¿Cómo quieres ingresar la imagen?",
+    ["📁 Subir imagen", "📷 Tomar foto"],
+    horizontal=True
 )
+
+archivo = None
+
+if opcion == "📁 Subir imagen":
+
+    archivo = st.file_uploader(
+        "Selecciona una imagen facial",
+        type=["jpg", "jpeg", "png"]
+    )
+
+else:
+
+    archivo = st.camera_input(
+        "Toma una fotografía facial"
+    )
 
 
 # =========================================================
@@ -310,12 +320,10 @@ if archivo is not None:
         archivo
     ).convert("RGB")
 
-    # Mismo preprocesamiento utilizado durante el entrenamiento
     x = prep(
         imagen
     ).unsqueeze(0).to(DISP)
 
-    # Inferencia
     with torch.no_grad():
 
         salida = modelo(x)
@@ -363,7 +371,6 @@ if archivo is not None:
             f"{confianza:.2%}"
         )
 
-        # Interpretación visual de confianza
         if confianza >= 0.80:
 
             st.success(
@@ -489,7 +496,7 @@ if archivo is not None:
 else:
 
     st.info(
-        "👆 Sube una imagen facial para comenzar el análisis."
+        "👆 Sube una imagen o toma una fotografía para comenzar el análisis."
     )
 
 
