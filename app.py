@@ -6,7 +6,9 @@ import os
 from google import genai
 
 
-#1. configuracion pagina
+# =========================================================
+# 1. CONFIGURACIÓN DE PÁGINA
+# =========================================================
 
 st.set_page_config(
     page_title="EmotionAI - Reconocimiento de Expresiones",
@@ -14,105 +16,171 @@ st.set_page_config(
     layout="centered"
 )
 
-#2. estilo visual
+
+# =========================================================
+# 2. ESTILO VISUAL - TEMÁTICA EMOCIONES Y BIENESTAR
+# =========================================================
 
 st.markdown("""
 <style>
 
-/* Espaciado general */
+/* Fondo general */
+.stApp {
+    background: linear-gradient(
+        180deg,
+        #FCFAFF 0%,
+        #FFF9FB 55%,
+        #FAFCFF 100%
+    );
+}
+
+/* Contenedor principal */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 3rem;
+    max-width: 950px;
 }
 
 /* Títulos */
 h1, h2, h3 {
-    color: #30313D;
+    color: #35323F;
 }
 
-/* Tarjetas */
+/* Cabecera principal */
+.hero {
+    padding: 30px 32px;
+    border-radius: 22px;
+    background: linear-gradient(
+        135deg,
+        #EFE8FF 0%,
+        #FFE9F0 100%
+    );
+    border: 1px solid #E7DDF3;
+    margin-bottom: 22px;
+    box-shadow: 0px 6px 20px rgba(85, 63, 105, 0.07);
+}
+
+.hero-title {
+    font-size: 44px;
+    font-weight: 750;
+    color: #35323F;
+    margin-bottom: 5px;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: #625D6A;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Tarjetas métricas */
 div[data-testid="stMetric"] {
-    background-color: #F8F7FB;
-    border: 1px solid #E6E2EC;
-    padding: 15px;
-    border-radius: 14px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5DDEC;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0px 3px 12px rgba(70, 50, 90, 0.05);
+}
+
+/* Valor de las métricas */
+div[data-testid="stMetricValue"] {
+    font-size: 28px;
+}
+
+/* Expanders */
+div[data-testid="stExpander"] {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    border: 1px solid #E8E1EF;
+}
+
+/* Carga de archivo */
+div[data-testid="stFileUploader"] {
+    background-color: #FFFFFF;
+    border-radius: 16px;
 }
 
 /* Botón principal */
 .stButton > button {
     width: 100%;
-    border-radius: 10px;
-    font-weight: 600;
-    padding: 0.6rem;
+    border-radius: 12px;
+    font-weight: 650;
+    padding: 0.7rem;
+    border: 1px solid #CCB8E2;
+}
+
+/* Separadores */
+hr {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-#3. cabecera app
+# =========================================================
+# 3. CABECERA TEMÁTICA
+# =========================================================
 
-st.markdown("""
-<div style="
-    padding: 22px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #F4F0FF 0%, #FFF2F5 100%);
-    margin-bottom: 22px;
-">
-    <h1 style="margin-bottom:5px;">🧠 EmotionAI</h1>
-
-    <p style="
-        font-size:17px;
-        margin:0;
-        color:#555;
-    ">
-        Clasificación educativa de expresiones faciales mediante
-        inteligencia artificial.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+# Se construye en una sola cadena para evitar que Streamlit
+# muestre el HTML como bloque de código.
+st.markdown(
+    '<div class="hero">'
+    '<div class="hero-title">🧠 EmotionAI</div>'
+    '<div class="hero-subtitle">'
+    'Explora expresiones faciales con inteligencia artificial '
+    'y recibe una interpretación educativa y responsable.'
+    '</div>'
+    '</div>',
+    unsafe_allow_html=True
+)
 
 st.write(
-    "La aplicación clasifica imágenes faciales entre las categorías "
-    "**depressive** y **natural**, mostrando la predicción, "
-    "su confianza y una recomendación educativa generada por IA."
+    "EmotionAI analiza una imagen facial y estima si se aproxima a las "
+    "categorías **depressive** o **natural**. Además, muestra el nivel de "
+    "confianza del modelo y puede generar una orientación educativa "
+    "relacionada con el bienestar."
 )
 
 
-#4. desempeño global del modelo
+# =========================================================
+# 4. DESEMPEÑO GLOBAL DEL MODELO
+# =========================================================
 
 with st.expander(
-    "📊 Ver métricas globales del modelo en conjunto de prueba"
+    "📊 Ver desempeño global del modelo en conjunto de prueba"
 ):
 
-    col1, col2, col3 = st.columns(3)
+    st.markdown(
+        "**Modelo utilizado:** EfficientNet-B0 mediante Transfer Learning"
+    )
+
+    col1, col2 = st.columns(2)
 
     with col1:
         st.metric(
-            "Modelo",
-            "EfficientNet-B0"
+            "Accuracy en Test",
+            "66.32%"
         )
 
     with col2:
         st.metric(
-            "Accuracy Test",
-            "74.08%"
-        )
-
-    with col3:
-        st.metric(
-            "Accuracy balanceada",
-            "73.84%"
+            "Accuracy balanceada en Test",
+            "65.91%"
         )
 
     st.caption(
         "Estas métricas representan el rendimiento general del modelo "
-        "sobre datos del conjunto de prueba. No deben confundirse con "
-        "la confianza obtenida para una imagen específica."
+        "sobre el conjunto de prueba. Son distintas de la confianza "
+        "obtenida al analizar una imagen específica."
     )
 
 
-#5. carga del modelo
+# =========================================================
+# 5. CARGA DEL MODELO
+# =========================================================
 
 DISP = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -120,6 +188,7 @@ DISP = "cuda" if torch.cuda.is_available() else "cpu"
 @st.cache_resource
 def cargar_modelo():
 
+    # Misma arquitectura utilizada durante el entrenamiento
     modelo = timm.create_model(
         "efficientnet_b0",
         pretrained=False,
@@ -135,6 +204,11 @@ def cargar_modelo():
     ):
         ruta = "/content/efficientnet_emociones.pt"
 
+    if not os.path.exists(ruta):
+        raise FileNotFoundError(
+            "No se encontró el archivo efficientnet_emociones.pt"
+        )
+
     checkpoint = torch.load(
         ruta,
         map_location=DISP
@@ -149,6 +223,7 @@ def cargar_modelo():
 
     clases = checkpoint["clases"]
 
+    # Mismo preprocesamiento utilizado por EfficientNet
     prep = timm.data.create_transform(
         **timm.data.resolve_model_data_config(modelo)
     )
@@ -159,7 +234,9 @@ def cargar_modelo():
 modelo, CLASES, prep = cargar_modelo()
 
 
-#6.funcion por gemini
+# =========================================================
+# 6. FUNCIÓN DE RECOMENDACIÓN CON GEMINI
+# =========================================================
 
 def generar_recomendacion(clase, confianza):
 
@@ -178,24 +255,24 @@ def generar_recomendacion(clase, confianza):
     )
 
     prompt = f"""
-    Actúa como un asistente educativo de bienestar.
+Actúa como un asistente educativo de bienestar.
 
-    El resultado de un modelo de clasificación de imágenes fue:
+El resultado de un modelo de clasificación de imágenes fue:
 
-    - Clase predicha: {clase}
-    - Confianza: {confianza:.2%}
+- Clase predicha: {clase}
+- Confianza: {confianza:.2%}
 
-    Genera una recomendación breve, clara y responsable.
+Genera una recomendación breve, clara y responsable.
 
-    Reglas:
-    - No realices diagnósticos de depresión ni de salud mental.
-    - No afirmes que la persona tiene una condición clínica.
-    - Explica que el resultado proviene únicamente de una imagen facial.
-    - Si la confianza es menor al 60%, indica que el resultado es incierto.
-    - Recomienda consultar a un profesional si existe preocupación real
-      por el bienestar emocional.
-    - Mantén la respuesta en un máximo de 4 frases.
-    """
+Reglas:
+- No realices diagnósticos de depresión ni de salud mental.
+- No afirmes que la persona tiene una condición clínica.
+- Explica que el resultado proviene únicamente de una imagen facial.
+- Si la confianza es menor al 60%, indica que el resultado es incierto.
+- Recomienda consultar a un profesional si existe preocupación real
+  por el bienestar emocional.
+- Mantén la respuesta en un máximo de 4 frases.
+"""
 
     respuesta = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -205,16 +282,27 @@ def generar_recomendacion(clase, confianza):
     return respuesta.text
 
 
-#7 carga de imagen 
+# =========================================================
+# 7. CARGA DE IMAGEN
+# =========================================================
 
-st.subheader("📷 Analizar una imagen")
+st.markdown("## 😊 Analiza una expresión facial")
 
-archivo = st.file_uploader(
-    "Sube una imagen facial",
-    type=["jpg", "jpeg", "png"]
+st.write(
+    "Sube una fotografía facial en formato JPG, JPEG o PNG "
+    "para realizar el análisis."
 )
 
-#8. inferencia
+archivo = st.file_uploader(
+    "Selecciona una imagen facial",
+    type=["jpg", "jpeg", "png"],
+    label_visibility="collapsed"
+)
+
+
+# =========================================================
+# 8. INFERENCIA
+# =========================================================
 
 if archivo is not None:
 
@@ -222,7 +310,7 @@ if archivo is not None:
         archivo
     ).convert("RGB")
 
-    # Preprocesamiento del modelo
+    # Mismo preprocesamiento utilizado durante el entrenamiento
     x = prep(
         imagen
     ).unsqueeze(0).to(DISP)
@@ -244,13 +332,17 @@ if archivo is not None:
     confianza = probabilidades[indice].item()
 
 
-   #9. imagen y resultado
+    # =====================================================
+    # 9. IMAGEN Y RESULTADO
+    # =====================================================
 
-    col_img, col_resultado = st.columns(2)
+    st.divider()
+
+    col_img, col_resultado = st.columns([1, 1])
 
     with col_img:
 
-        st.markdown("### Imagen analizada")
+        st.markdown("### 🖼️ Imagen analizada")
 
         st.image(
             imagen,
@@ -259,7 +351,7 @@ if archivo is not None:
 
     with col_resultado:
 
-        st.markdown("### Resultado")
+        st.markdown("### 🧠 Lectura del modelo")
 
         st.metric(
             "Clase predicha",
@@ -267,40 +359,48 @@ if archivo is not None:
         )
 
         st.metric(
-            "Confianza",
+            "Confianza de esta imagen",
             f"{confianza:.2%}"
         )
 
+        # Interpretación visual de confianza
         if confianza >= 0.80:
 
             st.success(
-                "✅ Confianza alta"
+                "✅ Nivel de confianza alto"
             )
 
         elif confianza >= 0.60:
 
             st.warning(
-                "⚠️ Confianza moderada"
+                "⚠️ Nivel de confianza moderado"
             )
 
         else:
 
             st.error(
-                "⚠️ Confianza baja"
+                "⚠️ Nivel de confianza bajo"
             )
 
         st.caption(
-            "La confianza corresponde únicamente a esta imagen "
-            "y no representa el desempeño global del modelo."
+            "La confianza corresponde únicamente a esta imagen. "
+            "No representa el desempeño global del modelo."
         )
 
 
- #10. probabilidades
+    # =====================================================
+    # 10. PROBABILIDADES POR CLASE
+    # =====================================================
 
     st.divider()
 
-    st.subheader(
-        "📊 Probabilidades por clase"
+    st.markdown(
+        "## 🎭 Probabilidades estimadas por clase"
+    )
+
+    st.write(
+        "El gráfico muestra cómo se distribuye la probabilidad "
+        "calculada por el modelo entre ambas categorías."
     )
 
     prob_dict = {
@@ -328,37 +428,44 @@ if archivo is not None:
             f"{float(probabilidades[1]):.2%}"
         )
 
-#11. advertencia 
+
+    # =====================================================
+    # 11. ADVERTENCIA SEGÚN CONFIANZA
+    # =====================================================
 
     if confianza < 0.60:
 
         st.warning(
-            "La confianza del modelo es inferior al 60%. "
-            "Este resultado debe interpretarse con precaución "
-            "y se recomienda revisión humana."
+            "⚠️ La confianza del modelo es inferior al 60%. "
+            "El resultado es incierto y debe interpretarse con "
+            "precaución. Se recomienda revisión humana."
         )
 
 
- #12. recomendacion generada por ia 
+    # =====================================================
+    # 12. RECOMENDACIÓN GENERADA POR IA
+    # =====================================================
+
     st.divider()
 
-    st.subheader(
-        "💬 Recomendación generada por IA"
+    st.markdown(
+        "## 💬 Orientación de bienestar"
     )
 
     st.write(
-        "Puedes solicitar una recomendación educativa "
-        "basada en la clase predicha y su nivel de confianza."
+        "Puedes solicitar una orientación educativa generada por IA. "
+        "Para ello se envían a Gemini únicamente la clase predicha "
+        "y el nivel de confianza; la imagen no se envía al modelo de lenguaje."
     )
 
     if st.button(
-        "✨ Generar recomendación"
+        "✨ Generar orientación con IA"
     ):
 
         try:
 
             with st.spinner(
-                "Generando recomendación responsable con Gemini..."
+                "Generando una orientación responsable..."
             ):
 
                 rec = generar_recomendacion(
@@ -367,7 +474,7 @@ if archivo is not None:
                 )
 
             st.success(
-                "Recomendación generada"
+                "Orientación generada"
             )
 
             st.write(rec)
@@ -375,7 +482,7 @@ if archivo is not None:
         except Exception as e:
 
             st.error(
-                f"No fue posible generar la recomendación: {e}"
+                f"No fue posible generar la orientación: {e}"
             )
 
 
@@ -386,16 +493,21 @@ else:
     )
 
 
-#13.aviso responsable
+# =========================================================
+# 13. USO RESPONSABLE
+# =========================================================
 
 st.divider()
 
-st.markdown("### ⚠️ Uso responsable")
+st.markdown(
+    "## 🌿 Uso responsable"
+)
 
-st.caption(
-    "Esta aplicación tiene exclusivamente fines educativos y experimentales. "
+st.info(
+    "EmotionAI tiene exclusivamente fines educativos y experimentales. "
     "El análisis se basa únicamente en una expresión facial y no constituye "
-    "bajo ninguna circunstancia un diagnóstico médico, psicológico o de "
-    "salud mental. Si existe preocupación por el bienestar emocional de "
-    "una persona, se recomienda consultar con un profesional."
+    "un diagnóstico médico, psicológico ni de salud mental. "
+    "Una expresión facial por sí sola no permite determinar el estado "
+    "emocional o clínico de una persona. Si existe preocupación por el "
+    "bienestar emocional, se recomienda consultar con un profesional."
 )
